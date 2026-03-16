@@ -1,11 +1,11 @@
-# Rust OAuth Test Server
+# OAuth 2.0 Test Server
 
 A fast, fully configurable, in-memory OAuth 2.0 + OpenID Connect authorization server for testing, zero-HTTP mode and DCR support for testing auth flow in MCP Servers and MCP Clients.
 
+This server was developed with the purpose of supporting testing and development of the [<img align="top" src="https://raw.githubusercontent.com/rust-mcp-stack/rust-mcp-schema/refs/heads/main/assets/rust-mcp-stack-icon.png" width="24" style="border-radius:0.1rem;">  rust-mcp-sdk](https://github.com/rust-mcp-stack/rust-mcp-sdk), but it works perfectly as a general-purpose auth mocking in any Rust (or non-Rust) project , unit tests, integration suites, local dev, or quick prototypes.  
+Refer to [Key Features](#key-features) to find out more.
 
-### Caution
-This server was developed with the purpose of supporting testing and development of the [<img align="top" src="https://raw.githubusercontent.com/rust-mcp-stack/rust-mcp-schema/refs/heads/main/assets/rust-mcp-stack-icon.png" width="24" style="border-radius:0.1rem;">  rust-mcp-sdk](https://github.com/rust-mcp-stack/rust-mcp-sdk), and may not be maintained or updated regularly. Please consider this when integrating or using this server in other contexts.
-
+# 
 **⚠️ For testing/development only**
 - In-memory storage (not persistent)
 - No rate limiting or attack protection
