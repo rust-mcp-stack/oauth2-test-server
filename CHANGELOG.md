@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/rust-mcp-stack/oauth2-test-server/compare/v0.2.0...v0.2.1) (2026-03-16)
+
+
+### 🐛 Bug Fixes
+
+* Downgrade dependency for release ([f6d19e7](https://github.com/rust-mcp-stack/oauth2-test-server/commit/f6d19e706bc1dc65bf9b565730b6ffbb163e35ba))
+
 ## [0.2.0](https://github.com/rust-mcp-stack/oauth2-test-server/compare/v0.1.3...v0.2.0) (2026-03-16)
 
 

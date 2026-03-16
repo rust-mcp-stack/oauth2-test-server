@@ -1,6 +1,6 @@
 [package]
 name = "oauth2-test-server"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 authors = ["Ali Hashemi"]
 description = "A fast, fully configurable, in-memory OAuth 2.0 + OpenID Connect authorization server for testing, zero-HTTP mode and DCR support for testing auth flow in MCP Servers and MCP Clients"
