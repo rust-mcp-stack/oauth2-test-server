@@ -4,7 +4,7 @@ use axum::{
     Json,
 };
 use chrono::{Duration, Utc};
-use rand::RngExt;
+use rand::Rng;
 use serde::Deserialize;
 use serde_json::json;
 
@@ -24,10 +24,10 @@ pub struct DeviceCodeRequest {
 const DEVICE_CODE_CHARSET: &[u8] = b"BCDFGHJKLMNPQRSTUVWXYZ23456789";
 
 fn generate_user_code() -> String {
-    let mut rng = rand::rng();
+    let mut rng = rand::thread_rng();
     let code: String = (0..8)
         .map(|_| {
-            let idx = rng.random_range(0..DEVICE_CODE_CHARSET.len());
+            let idx = rng.gen_range(0..DEVICE_CODE_CHARSET.len());
             DEVICE_CODE_CHARSET[idx] as char
         })
         .collect();
