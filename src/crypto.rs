@@ -23,7 +23,8 @@ pub struct Keys {
 impl Keys {
     /// Generate a fresh 2048-bit RSA key pair for this server instance.
     pub fn generate() -> Self {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
+
         let private_key =
             RsaPrivateKey::new(&mut rng, 2048).expect("failed to generate RSA key pair");
         let public_key = private_key.to_public_key();
@@ -66,8 +67,8 @@ pub fn build_jwks_json(keys: &Keys) -> serde_json::Value {
         },
         algorithm: jsonwebtoken::jwk::AlgorithmParameters::RSA(
             jsonwebtoken::jwk::RSAKeyParameters {
-                n: general_purpose::URL_SAFE_NO_PAD.encode(public_key.n().to_bytes_be()),
-                e: general_purpose::URL_SAFE_NO_PAD.encode(public_key.e().to_bytes_be()),
+                n: general_purpose::URL_SAFE_NO_PAD.encode(public_key.n().to_be_bytes()),
+                e: general_purpose::URL_SAFE_NO_PAD.encode(public_key.e().to_be_bytes()),
                 key_type: jsonwebtoken::jwk::RSAKeyType::RSA,
             },
         ),

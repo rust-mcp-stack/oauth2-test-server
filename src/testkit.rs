@@ -1,5 +1,6 @@
 use base64::{engine::general_purpose, Engine};
 use jsonwebtoken::{encode, Algorithm, Header};
+use rand::RngExt;
 use reqwest::{Client as HttpClient, StatusCode};
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
@@ -277,8 +278,7 @@ impl OAuthTestServer {
     }
 
     pub fn pkce_pair(&self) -> PkcePair {
-        use rand::Rng;
-        let verifier_bytes: [u8; 32] = rand::thread_rng().r#gen();
+        let verifier_bytes: [u8; 32] = rand::rng().random();
         let code_verifier = general_purpose::URL_SAFE_NO_PAD.encode(verifier_bytes);
         let challenge =
             general_purpose::URL_SAFE_NO_PAD.encode(Sha256::digest(code_verifier.as_bytes()));
