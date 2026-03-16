@@ -1,0 +1,60 @@
+[package]
+name = "oauth2-test-server"
+version = "0.1.3"
+edition = "2021"
+authors = ["Ali Hashemi"]
+description = "A fast, fully configurable, in-memory OAuth 2.0 + OpenID Connect authorization server for testing, zero-HTTP mode and DCR support for testing auth flow in MCP Servers and MCP Clients"
+keywords = ["oauth2", "openid-connect", "oidc", "testing", "mock-server"]
+categories = ["development-tools::testing", "authentication", "web-programming"]
+exclude = [".github/","Makefile.toml"]
+license = "MIT"
+repository = "https://github.com/rust-mcp-stack/oauth2-test-server"
+documentation = "https://docs.rs/oauth2-test-server"
+
+[package.metadata.wix]
+upgrade-guid = "1B970F64-3D06-4E21-834D-431BD44279DD"
+path-guid = "A74F7647-BB66-4039-A6F0-A3E4A61520AE"
+license = false
+eula = false
+
+[features]
+# Enables the test-helper utilities (OAuthTestServer, testkit, etc.).
+# Enabled by default to maintain backward compatibility.
+default = ["testing", "config"]
+testing = ["dep:reqwest"]
+config = ["dep:serde_yaml", "dep:toml"]
+
+[dependencies]
+axum = { version = "0.8", features = ["json", "query"] }
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.0", features = ["v4"] }
+jsonwebtoken = { version = "10.1", features=["aws_lc_rs"]}
+rsa = "0.9"
+once_cell = "1.17"
+url = "2.3"
+base64 = "0.22"
+chrono = { version = "0.4", features = ["serde"] }
+rand = "0.8"
+futures = "0.3"
+tower-http = { version = "0.5", features = ["trace", "cors"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+sha2 = "0.10"
+http = "1.3"
+colored = "3.0"
+reqwest = { version = "0.12", optional = true, features = ["stream", "rustls-tls", "json", "cookies", "multipart"] }
+thiserror = "2.0"
+async-trait = "0.1"
+dotenvy = "0.15"
+envy = "0.4"
+serde_yaml = { version = "0.9", optional = true }
+toml = { version = "0.8", optional = true }
+
+[dev-dependencies]
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
