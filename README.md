@@ -122,12 +122,12 @@ You can run the server directly from your terminal - no code required.
 
   - **Shell script**
     ```bash
-    curl --proto '=https' --tlsv1.2 -LsSf https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.1.3/oauth2-test-server-installer.sh | sh
+    curl --proto '=https' --tlsv1.2 -LsSf https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.0/oauth2-test-server-installer.sh | sh
     ```
   
   - **PowerShell script**
     ```bash
-    powershell -ExecutionPolicy Bypass -c "irm https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.1.3/oauth2-test-server-installer.ps1 | iex"
+    powershell -ExecutionPolicy Bypass -c "irm https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.0/oauth2-test-server-installer.ps1 | iex"
     ```
 
   - **Homebrew**
@@ -155,55 +155,55 @@ You can run the server directly from your terminal - no code required.
         <tr>      
         <td>Apple Silicon macOS</td>
         <td>
-        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.4.1/oauth2-test-server-aarch64-apple-darwin.tar.gz">oauth2-test-server-aarch64-apple-darwin.tar.gz</a>
+        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.0/oauth2-test-server-aarch64-apple-darwin.tar.gz">oauth2-test-server-aarch64-apple-darwin.tar.gz</a>
         </td>
         <td>
-        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.4.1/oauth2-test-server-aarch64-apple-darwin.tar.gz.sha256">checksum</a>
+        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.0/oauth2-test-server-aarch64-apple-darwin.tar.gz.sha256">checksum</a>
         </td>
         </tr>
         <tr>
         <td>Intel macOS</td>
         <td>
-        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.4.1/oauth2-test-server-x86_64-apple-darwin.tar.gz">oauth2-test-server-x86_64-apple-darwin.tar.gz</a>
+        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.0/oauth2-test-server-x86_64-apple-darwin.tar.gz">oauth2-test-server-x86_64-apple-darwin.tar.gz</a>
         </td>
         <td>
-        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.4.1/oauth2-test-server-x86_64-apple-darwin.tar.gz.sha256">checksum</a>
+        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.0/oauth2-test-server-x86_64-apple-darwin.tar.gz.sha256">checksum</a>
         </td>
         </tr>
         <tr>
         <td>x64 Windows (zip)</td>  
         <td>
-        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.4.1/oauth2-test-server-x86_64-pc-windows-msvc.zip">oauth2-test-server-x86_64-pc-windows-msvc.zip</a>
+        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.0/oauth2-test-server-x86_64-pc-windows-msvc.zip">oauth2-test-server-x86_64-pc-windows-msvc.zip</a>
         </td>        
         <td>
-        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.4.1/oauth2-test-server-x86_64-pc-windows-msvc.zip.sha256">checksum</a>
+        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.0/oauth2-test-server-x86_64-pc-windows-msvc.zip.sha256">checksum</a>
         </td>
         </tr>
         <tr>
         <td>x64 Windows (msi)</td>
         <td>
-        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.4.1/oauth2-test-server-x86_64-pc-windows-msvc.msi">oauth2-test-server-x86_64-pc-windows-msvc.msi</a>
+        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.0/oauth2-test-server-x86_64-pc-windows-msvc.msi">oauth2-test-server-x86_64-pc-windows-msvc.msi</a>
         </td>        
         <td>
-        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.4.1/oauth2-test-server-x86_64-pc-windows-msvc.msi.sha256">checksum</a>
+        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.0/oauth2-test-server-x86_64-pc-windows-msvc.msi.sha256">checksum</a>
         </td>
         </tr>
         <tr>
         <td>ARM64 Linux</td>
         <td>
-        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.4.1/oauth2-test-server-aarch64-unknown-linux-gnu.tar.gz">oauth2-test-server-aarch64-unknown-linux-gnu.tar.gz</a>
+        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.0/oauth2-test-server-aarch64-unknown-linux-gnu.tar.gz">oauth2-test-server-aarch64-unknown-linux-gnu.tar.gz</a>
         </td>        
         <td>
-        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.4.1/oauth2-test-server-aarch64-unknown-linux-gnu.tar.gz.sha256">checksum</a>
+        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.0/oauth2-test-server-aarch64-unknown-linux-gnu.tar.gz.sha256">checksum</a>
         </td>
         </tr>
         <tr>
         <td>x64 Linux</td>
         <td>
-        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.4.1/oauth2-test-server-x86_64-unknown-linux-gnu.tar.gz">oauth2-test-server-x86_64-unknown-linux-gnu.tar.gz</a>
+        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.0/oauth2-test-server-x86_64-unknown-linux-gnu.tar.gz">oauth2-test-server-x86_64-unknown-linux-gnu.tar.gz</a>
         </td>        
         <td>
-        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.4.1/oauth2-test-server-x86_64-unknown-linux-gnu.tar.gz.sha256">checksum</a>
+        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.0/oauth2-test-server-x86_64-unknown-linux-gnu.tar.gz.sha256">checksum</a>
         </td>
         </tr>
     </tbody>
