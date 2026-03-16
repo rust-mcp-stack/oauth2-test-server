@@ -4,7 +4,7 @@ A fast, fully configurable, in-memory OAuth 2.0 + OpenID Connect authorization s
 
 
 ### Caution
-This server was developed with the purpose of supporting testing and development of the [rust-mcp-sdk](https://github.com/rust-mcp-stack/rust-mcp-sdk), and may not be maintained or updated regularly. Please consider this when integrating or using this server in other contexts.
+This server was developed with the purpose of supporting testing and development of the [<img align="top" src="https://raw.githubusercontent.com/rust-mcp-stack/rust-mcp-schema/refs/heads/main/assets/rust-mcp-stack-icon.png" width="24" style="border-radius:0.1rem;">  rust-mcp-sdk](https://github.com/rust-mcp-stack/rust-mcp-sdk), and may not be maintained or updated regularly. Please consider this when integrating or using this server in other contexts.
 
 **⚠️ For testing/development only**
 - In-memory storage (not persistent)
