@@ -1,4 +1,13 @@
-# OAuth 2.0 Test Server
+<p align="center">
+  <img width="96" src="./docs/oauth2-test-server.png" alt="OAuth 2.0 Test Server Logo" width="300">
+</p>
+<h1 align="center">OAuth 2.0 Test Server</h1>
+
+[<img alt="crates.io" src="https://img.shields.io/crates/v/oauth2-test-server?style=for-the-badge&logo=rust&color=FE965D" height="22">](https://crates.io/crates/oauth2-test-server)
+[<img alt="docs.rs" src="https://img.shields.io/badge/docs.rs-oauth_2.0_test_server-0ECDAB?style=for-the-badge&logo=docs.rs" height="22">](https://docs.rs/oauth2-test-server)
+[<img alt="build status" src="https://img.shields.io/github/actions/workflow/status/rust-mcp-stack/oauth2-test-server/ci.yml?style=for-the-badge" height="22">
+](https://github.com/rust-mcp-stack/oauth2-test-server/actions/workflows/ci.yml)
+
 
 A fast, fully configurable, in-memory OAuth 2.0 + OpenID Connect authorization server for testing, zero-HTTP mode and DCR support for testing auth flow in MCP Servers and MCP Clients.
 
@@ -154,20 +163,20 @@ You can run the server directly from your terminal - no code required.
     <tbody>
         <tr>      
         <td>Apple Silicon macOS</td>
-        <td>
-        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.1/oauth2-test-server-aarch64-apple-darwin.tar.gz">oauth2-test-server-aarch64-apple-darwin.tar.gz</a>
+        <td>                 
+        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.1/oauth2-test-server-aarch64-apple-darwin.tar.xz">oauth2-test-server-aarch64-apple-darwin.tar.xz</a>
         </td>
         <td>
-        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.1/oauth2-test-server-aarch64-apple-darwin.tar.gz.sha256">checksum</a>
+        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.1/oauth2-test-server-aarch64-apple-darwin.tar.xz.sha256">checksum</a>
         </td>
         </tr>
         <tr>
         <td>Intel macOS</td>
         <td>
-        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.1/oauth2-test-server-x86_64-apple-darwin.tar.gz">oauth2-test-server-x86_64-apple-darwin.tar.gz</a>
+        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.1/oauth2-test-server-x86_64-apple-darwin.tar.xz">oauth2-test-server-x86_64-apple-darwin.tar.xz</a>
         </td>
         <td>
-        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.1/oauth2-test-server-x86_64-apple-darwin.tar.gz.sha256">checksum</a>
+        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.1/oauth2-test-server-x86_64-apple-darwin.tar.xz.sha256">checksum</a>
         </td>
         </tr>
         <tr>
@@ -191,19 +200,19 @@ You can run the server directly from your terminal - no code required.
         <tr>
         <td>ARM64 Linux</td>
         <td>
-        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.1/oauth2-test-server-aarch64-unknown-linux-gnu.tar.gz">oauth2-test-server-aarch64-unknown-linux-gnu.tar.gz</a>
+        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.1/oauth2-test-server-aarch64-unknown-linux-gnu.tar.xz">oauth2-test-server-aarch64-unknown-linux-gnu.tar.xz</a>
         </td>        
         <td>
-        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.1/oauth2-test-server-aarch64-unknown-linux-gnu.tar.gz.sha256">checksum</a>
+        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.1/oauth2-test-server-aarch64-unknown-linux-gnu.tar.xz.sha256">checksum</a>
         </td>
         </tr>
         <tr>
         <td>x64 Linux</td>
         <td>
-        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.1/oauth2-test-server-x86_64-unknown-linux-gnu.tar.gz">oauth2-test-server-x86_64-unknown-linux-gnu.tar.gz</a>
+        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.1/oauth2-test-server-x86_64-unknown-linux-gnu.tar.xz">oauth2-test-server-x86_64-unknown-linux-gnu.tar.xz</a>
         </td>        
         <td>
-        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.1/oauth2-test-server-x86_64-unknown-linux-gnu.tar.gz.sha256">checksum</a>
+        <a href="https://github.com/rust-mcp-stack/oauth2-test-server/releases/download/v0.2.1/oauth2-test-server-x86_64-unknown-linux-gnu.tar.xz.sha256">checksum</a>
         </td>
         </tr>
     </tbody>
@@ -434,7 +443,29 @@ async fn with_config() {
 ```
 
 
-**⚠️ For testing/development only**
-- In-memory storage (not persistent)
-- No rate limiting or attack protection
-- Use in test suites, CI/CD, local development
+## Migration Guide
+
+### Upgrading from 0.1.x to 0.2.x
+
+**1. Methods are now `async`** - Add `.await`:
+```rust
+// Before (0.1.x)
+let client = server.register_client(json!({...}));
+let token = server.generate_token(&client, options);
+
+// After (0.2.x)
+let client = server.register_client(json!({...})).await;
+let token = server.generate_token(&client, options).await;
+```
+
+**2. Accessor methods return `Vec` instead of `Arc<RwLock<HashMap>>`**:
+```rust
+// Before (0.1.x)
+assert_eq!(server.clients().read().iter().len(), 1);
+
+// After (0.2.x)
+assert_eq!(server.clients().await.len(), 1);
+
+// Or for mutation (reset state between tests):
+server.clear_all().await;
+```
