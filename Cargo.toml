@@ -10,6 +10,8 @@ exclude = [".github/","Makefile.toml"]
 license = "MIT"
 repository = "https://github.com/rust-mcp-stack/oauth2-test-server"
 documentation = "https://docs.rs/oauth2-test-server"
+homepage = "https://github.com/rust-mcp-stack/oauth2-test-server"
+
 
 [package.metadata.wix]
 upgrade-guid = "1B970F64-3D06-4E21-834D-431BD44279DD"
