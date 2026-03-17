@@ -1,0 +1,160 @@
+# =============================================================================
+# OAuth2 Test Server - Docker Compose Examples
+# =============================================================================
+# This file demonstrates various ways to run the OAuth2 test server with Docker.
+# =============================================================================
+
+# Version (for older docker-compose versions)
+version: "3.8"
+
+services:
+  # ---------------------------------------------------------------------------
+  # Basic usage - just run the server with defaults
+  # ---------------------------------------------------------------------------
+  oauth2-basic:
+    image: rustmcp/oauth2-server:latest
+    ports:
+      - "8090:8090"
+
+  # ---------------------------------------------------------------------------
+  # With custom configuration via environment variables
+  # ---------------------------------------------------------------------------
+  oauth2-with-env:
+    image: rustmcp/oauth2-server:latest
+    ports:
+      - "8090:8090"
+    environment:
+      # Server configuration
+      - OAUTH_PORT=8090
+      - OAUTH_HOST=0.0.0.0
+      - OAUTH_SCHEME=http
+      
+      # Security settings
+      - OAUTH_REQUIRE_STATE=true
+      
+      # Token expiration (in seconds)
+      - OAUTH_ACCESS_TOKEN_EXPIRES_IN=3600
+      - OAUTH_REFRESH_TOKEN_EXPIRES_IN=86400
+      - OAUTH_AUTHORIZATION_CODE_EXPIRES_IN=600
+      
+      # Cleanup settings
+      - OAUTH_CLEANUP_INTERVAL_SECS=300
+      
+      # CORS settings (comma-separated list of allowed origins)
+      - OAUTH_ALLOWED_ORIGINS=http://localhost:3000,https://example.com
+      
+      # Default user for testing
+      - OAUTH_DEFAULT_USER_ID=test-user-123
+      
+      # OIDC settings
+      - OAUTH_GENERATE_CLIENT_SECRET_FOR_DCR=true
+
+  # ---------------------------------------------------------------------------
+  # With custom configuration file (YAML)
+  # ---------------------------------------------------------------------------
+  oauth2-yaml-config:
+    image: rustmcp/oauth2-server:latest
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./config.yaml:/home/appuser/config/config.yaml:ro
+    environment:
+      - OAUTH_CONFIG_FILE=/home/appuser/config/config.yaml
+
+  # ---------------------------------------------------------------------------
+  # With custom configuration file (TOML)
+  # ---------------------------------------------------------------------------
+  oauth2-toml-config:
+    image: rustmcp/oauth2-server:latest
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./config.toml:/home/appuser/config/config.toml:ro
+    environment:
+      - OAUTH_CONFIG_FILE=/home/appuser/config/config.toml
+
+  # ---------------------------------------------------------------------------
+  # Multi-port for different environments
+  # ---------------------------------------------------------------------------
+  oauth2-dev:
+    image: rustmcp/oauth2-server:latest
+    ports:
+      - "8090:8090"
+      # Additional ports if needed
+      # - "9090:8090"
+    environment:
+      - RUST_LOG=debug
+      - RUST_BACKTRACE=1
+
+  # ---------------------------------------------------------------------------
+  # Production deployment with health checks
+  # ---------------------------------------------------------------------------
+  oauth2-production:
+    image: rustmcp/oauth2-server:latest
+    ports:
+      - "8090:8090"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/.well-known/openid-configuration"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    environment:
+      - OAUTH_PORT=8090
+
+  # ---------------------------------------------------------------------------
+  # With network aliases for service discovery
+  # ---------------------------------------------------------------------------
+  oauth2-network:
+    image: rustmcp/oauth2-server:latest
+    ports:
+      - "8090:8090"
+    networks:
+      oauth-network:
+        aliases:
+          - oauth2
+          - auth-server
+
+  # ---------------------------------------------------------------------------
+  # Running multiple instances (for load testing)
+  # ---------------------------------------------------------------------------
+  oauth2-cluster:
+    image: rustmcp/oauth2-server:latest
+    deploy:
+      replicas: 2
+    ports:
+      - "8090-8091:8090"
+    environment:
+      - OAUTH_HOST=0.0.0.0
+
+  # ---------------------------------------------------------------------------
+  # Using custom port
+  # ---------------------------------------------------------------------------
+  oauth2-custom-port:
+    image: rustmcp/oauth2-server:latest
+    ports:
+      - "3000:8090"
+    environment:
+      - OAUTH_PORT=8090  # Internal port (inside container)
+
+  # ---------------------------------------------------------------------------
+  # With resource limits (recommended for production)
+  # ---------------------------------------------------------------------------
+  oauth2-limited:
+    image: rustmcp/oauth2-server:latest
+    ports:
+      - "8090:8090"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+
+# Network definitions
+networks:
+  oauth-network:
+    driver: bridge

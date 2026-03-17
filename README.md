@@ -469,3 +469,137 @@ assert_eq!(server.clients().await.len(), 1);
 // Or for mutation (reset state between tests):
 server.clear_all().await;
 ```
+
+## Run with Docker
+
+### Quick Start
+
+```bash
+# Pull and run the latest image
+docker run -d -p 8090:8090 rustmcp/oauth2-server:latest
+
+# Verify it's running
+curl http://localhost:8090/.well-known/openid-configuration
+```
+
+### Using Docker Compose
+
+```bash
+# Start with default settings
+docker-compose up -d
+
+# Or start with custom configuration
+docker-compose -f docker-compose.yml up -d
+```
+
+### Configuration Options
+
+#### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OAUTH_PORT` | `8090` | Server port |
+| `OAUTH_HOST` | `localhost` | Server host |
+| `OAUTH_SCHEME` | `http` | HTTP scheme |
+| `OAUTH_REQUIRE_STATE` | `true` | Require state parameter |
+| `OAUTH_ACCESS_TOKEN_EXPIRES_IN` | `3600` | Access token TTL (seconds) |
+| `OAUTH_REFRESH_TOKEN_EXPIRES_IN` | `86400` | Refresh token TTL (seconds) |
+| `OAUTH_AUTHORIZATION_CODE_EXPIRES_IN` | `600` | Auth code TTL (seconds) |
+| `OAUTH_CLEANUP_INTERVAL_SECS` | `300` | Cleanup interval (seconds) |
+| `OAUTH_ALLOWED_ORIGINS` | (all) | Comma-separated CORS origins |
+| `OAUTH_DEFAULT_USER_ID` | `test-user-123` | Default user ID |
+| `OAUTH_GENERATE_CLIENT_SECRET_FOR_DCR` | `true` | Generate client secrets |
+| `OAUTH_CONFIG_FILE` | - | Path to config file (YAML/TOML) |
+
+#### Configuration File
+
+Mount a config file into the container:
+
+```bash
+# YAML
+docker run -d -p 8090:8090 \
+  -v $(pwd)/config.yaml:/home/appuser/config/config.yaml:ro \
+  rustmcp/oauth2-server:latest
+
+# TOML
+docker run -d -p 8090:8090 \
+  -v $(pwd)/config.toml:/home/appuser/config/config.toml:ro \
+  rustmcp/oauth2-server:latest
+```
+
+See [`config.yaml`](config.yaml) and [`config.toml`](config.toml) for full configuration options.
+
+### Image Variants
+
+| Tag | Description | Size |
+|-----|-------------|------|
+| `latest`, `debian` | Debian-based (default) | ~50MB |
+| `alpine` | Alpine-based (smaller) | ~30MB |
+| `minimal` | Distroless (smallest) | ~15MB |
+
+### Building the Image
+
+```bash
+# Build standard image
+docker build -t oauth2-test-server .
+
+# Build Alpine variant
+docker build --target runtime-alpine -t oauth2-test-server:alpine .
+
+# Build minimal variant
+docker build --target runtime-minimal -t oauth2-test-server:minimal .
+
+# Multi-platform build (amd64 + arm64)
+docker buildx build --platform linux/amd64,linux/arm64 -t oauth2-test-server .
+```
+
+### Using the Makefile
+
+```bash
+# Build all variants
+make docker-build-all
+
+# Run with config file
+make docker-run-config
+
+# Run with environment variables
+make docker-run-env
+
+# Build and push to registry
+make docker-buildx-push
+```
+
+### Examples
+
+#### Basic Usage
+```bash
+docker run -d --name oauth2-server -p 8090:8090 rustmcp/oauth2-server:latest
+```
+
+#### With Custom Port
+```bash
+docker run -d -p 3000:8090 -e OAUTH_PORT=8090 rustmcp/oauth2-server:latest
+```
+
+#### With CORS
+```bash
+docker run -d -p 8090:8090 \
+  -e OAUTH_ALLOWED_ORIGINS=http://localhost:3000,https://example.com \
+  rustmcp/oauth2-server:latest
+```
+
+#### Production with Health Check
+```yaml
+# docker-compose.prod.yml
+services:
+  oauth2:
+    image: rustmcp/oauth2-server:latest
+    ports:
+      - "8090:8090"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/.well-known/openid-configuration"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+```

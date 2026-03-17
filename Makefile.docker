@@ -1,0 +1,213 @@
+# =============================================================================
+# Docker Makefile for OAuth2 Test Server
+# =============================================================================
+# Usage:
+#   make docker-build           # Build the Docker image
+#   make docker-build-alpine   # Build Alpine-based image
+#   make docker-build-minimal  # Build minimal distroless image
+#   make docker-run            # Run the container
+#   make docker-buildx         # Build multi-platform images
+#   make docker-push           # Push to registry
+# =============================================================================
+
+# Image name and tag
+IMAGE_NAME ?= rustmcp/oauth2-server
+IMAGE_TAG ?= latest
+REGISTRY ?= docker.io
+
+# Full image name
+FULL_IMAGE_NAME = $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)
+
+# Build arguments
+CARGO_RELEASE_FLAGS ?= --locked
+
+# Default target
+.PHONY: help
+help:
+	@echo "OAuth2 Test Server - Docker Makefile"
+	@echo "===================================="
+	@echo ""
+	@echo "Available targets:"
+	@echo "  docker-build           - Build standard Debian-based image"
+	@echo "  docker-build-alpine    - Build Alpine-based image (smaller)"
+	@echo "  docker-build-minimal  - Build distroless minimal image"
+	@echo "  docker-run             - Run the container"
+	@echo "  docker-run-detached   - Run in detached mode"
+	@echo "  docker-stop            - Stop running container"
+	@echo "  docker-logs            - View container logs"
+	@echo "  docker-shell           - Shell into running container"
+	@echo "  docker-clean            - Remove build artifacts"
+	@echo "  docker-buildx          - Build multi-platform (amd64 + arm64)"
+	@echo "  docker-push            - Push image to registry"
+	@echo "  docker-buildx-push    - Build and push multi-platform"
+	@echo ""
+
+# Build Docker image (Debian-based - default)
+.PHONY: docker-build
+docker-build:
+	docker build \
+		--target runtime-debian \
+		-t $(FULL_IMAGE_NAME) \
+		-t $(IMAGE_NAME):debian \
+		$(CARGO_RELEASE_FLAGS) \
+		.
+
+# Build Alpine-based image (smaller)
+.PHONY: docker-build-alpine
+docker-build-alpine:
+	docker build \
+		--target runtime-alpine \
+		-t $(IMAGE_NAME):alpine \
+		$(CARGO_RELEASE_FLAGS) \
+		.
+
+# Build minimal distroless image
+.PHONY: docker-build-minimal
+docker-build-minimal:
+	docker build \
+		--target runtime-minimal \
+		-t $(IMAGE_NAME):minimal \
+		$(CARGO_RELEASE_FLAGS) \
+		.
+
+# Build all variants
+.PHONY: docker-build-all
+docker-build-all: docker-build docker-build-alpine docker-build-minimal
+	@echo "Built all variants: debian, alpine, minimal"
+
+# Run container
+.PHONY: docker-run
+docker-run:
+	docker run --rm -it \
+		-p 8090:8090 \
+		$(FULL_IMAGE_NAME)
+
+# Run in detached mode
+.PHONY: docker-run-detached
+docker-run-detached:
+	docker run -d --name oauth2-server \
+		-p 8090:8090 \
+		$(FULL_IMAGE_NAME)
+
+# Run with environment variables
+.PHONY: docker-run-env
+docker-run-env:
+	docker run -d --name oauth2-server \
+		-p 8090:8090 \
+		-e OAUTH_PORT=8090 \
+		-e OAUTH_REQUIRE_STATE=true \
+		-e RUST_LOG=debug \
+		$(FULL_IMAGE_NAME)
+
+# Run with config file
+.PHONY: docker-run-config
+docker-run-config:
+	docker run -d --name oauth2-server \
+		-p 8090:8090 \
+		-v $(PWD)/config.yaml:/home/appuser/config/config.yaml:ro \
+		-e OAUTH_CONFIG_FILE=/home/appuser/config/config.yaml \
+		$(FULL_IMAGE_NAME)
+
+# Run with docker-compose
+.PHONY: docker-compose-up
+docker-compose-up:
+	docker-compose up -d
+
+# Stop container
+.PHONY: docker-stop
+docker-stop:
+	docker stop oauth2-server 2>/dev/null || true
+
+# View logs
+.PHONY: docker-logs
+docker-logs:
+	docker logs -f oauth2-server
+
+# Shell into container
+.PHONY: docker-shell
+docker-shell:
+	docker exec -it oauth2-server /bin/sh
+
+# Clean build artifacts
+.PHONY: docker-clean
+docker-clean:
+	docker builder prune -f
+	rm -rf target/
+
+# Multi-platform build (requires docker buildx)
+.PHONY: docker-buildx
+docker-buildx:
+	docker buildx build \
+		--platform linux/amd64,linux/arm64 \
+		--target runtime-debian \
+		-t $(IMAGE_NAME):latest \
+		-t $(IMAGE_NAME):$(IMAGE_TAG) \
+		$(CARGO_RELEASE_FLAGS) \
+		--load \
+		.
+
+# Push to registry
+.PHONY: docker-push
+docker-push:
+	docker push $(FULL_IMAGE_NAME)
+
+# Build and push multi-platform
+.PHONY: docker-buildx-push
+docker-buildx-push:
+	docker buildx build \
+		--platform linux/amd64,linux/arm64 \
+		--target runtime-debian \
+		-t $(IMAGE_NAME):latest \
+		-t $(IMAGE_NAME):$(IMAGE_TAG) \
+		$(CARGO_RELEASE_FLAGS) \
+		--push \
+		.
+
+# Build all variants and push
+.PHONY: docker-buildx-push-all
+docker-buildx-push-all:
+	docker buildx build \
+		--platform linux/amd64,linux/arm64 \
+		--target runtime-debian \
+		-t $(IMAGE_NAME):latest \
+		-t $(IMAGE_NAME):$(IMAGE_TAG) \
+		-t $(IMAGE_NAME):debian \
+		$(CARGO_RELEASE_FLAGS) \
+		--push \
+		.
+	docker buildx build \
+		--platform linux/amd64,linux/arm64 \
+		--target runtime-alpine \
+		-t $(IMAGE_NAME):alpine \
+		$(CARGO_RELEASE_FLAGS) \
+		--push \
+		.
+	docker buildx build \
+		--platform linux/amd64,linux/arm64 \
+		--target runtime-minimal \
+		-t $(IMAGE_NAME):minimal \
+		$(CARGO_RELEASE_FLAGS) \
+		--push \
+		.
+
+# Tag image
+.PHONY: docker-tag
+docker-tag:
+	docker tag $(IMAGE_NAME):latest $(FULL_IMAGE_NAME)
+
+# List images
+.PHONY: docker-images
+docker-images:
+	docker images | grep $(IMAGE_NAME)
+
+# Show running containers
+.PHONY: docker-ps
+docker-ps:
+	docker ps | grep oauth2 || echo "No running containers"
+
+# Health check
+.PHONY: docker-health
+docker-health:
+	@curl -s http://localhost:8090/.well-known/openid-configuration > /dev/null && \
+		echo "Server is healthy" || \
+		echo "Server is not responding"

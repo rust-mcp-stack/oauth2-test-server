@@ -1,0 +1,50 @@
+# =============================================================================
+# Docker Ignore File
+# =============================================================================
+# Exclude files not needed for building the Docker image
+# =============================================================================
+
+# Git
+.git
+.gitignore
+
+# GitHub
+.github
+
+# Documentation
+*.md
+docs/
+
+# Tests
+tests/
+*.rs
+
+# Development files
+.env
+.env.*
+*.toml
+!Cargo.toml
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+target/
+Cargo.lock
+
+# Docker files (include them in the image but not during build context)
+# Dockerfile
+# docker-compose.yml
+# config.yaml
+# config.toml
+
+# Misc
+*.log
+*.tmp
