@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/rust-mcp-stack/oauth2-test-server/compare/v0.2.1...v0.2.2) (2026-03-17)
+
+
+### ⚙️ Miscellaneous Chores
+
+* Release 0.2.2 ([640705b](https://github.com/rust-mcp-stack/oauth2-test-server/commit/640705b88be4f5f1a4a129557b94ff1f26e789ff))
+
 ## [0.2.1](https://github.com/rust-mcp-stack/oauth2-test-server/compare/v0.2.1...v0.2.1) (2026-03-17)
 
 
