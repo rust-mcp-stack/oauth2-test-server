@@ -60,3 +60,6 @@ toml = { version = "0.8", optional = true }
 [profile.dist]
 inherits = "release"
 lto = "thin"
+
+[package.metadata.dist]
+allow-dirty = true
