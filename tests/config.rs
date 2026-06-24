@@ -75,11 +75,10 @@ fn test_config_sample_file() {
     assert!(config.claims_supported.contains(&"email".to_string()));
     assert!(config.grant_types_supported.contains("authorization_code"));
     assert!(config.response_types_supported.contains("code"));
-    assert!(config.token_endpoint_auth_methods_supported.contains("none"));
+    assert!(config
+        .token_endpoint_auth_methods_supported
+        .contains("none"));
     assert!(config.code_challenge_methods_supported.contains("S256"));
     assert_eq!(config.subject_types_supported, vec!["public"]);
-    assert_eq!(
-        config.id_token_signing_alg_values_supported,
-        vec!["RS256"]
-    );
+    assert_eq!(config.id_token_signing_alg_values_supported, vec!["RS256"]);
 }

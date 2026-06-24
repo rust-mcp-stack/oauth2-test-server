@@ -122,9 +122,18 @@ mod tests {
         let payload_str = String::from_utf8(payload_bytes).unwrap();
         let payload: serde_json::Value = serde_json::from_str(&payload_str).unwrap();
 
-        assert!(!payload_str.contains("\"nonce\""), "nonce key should be absent, got: {payload_str}");
-        assert!(!payload_str.contains("\"at_hash\""), "at_hash key should be absent, got: {payload_str}");
-        assert!(!payload_str.contains("\"c_hash\""), "c_hash key should be absent, got: {payload_str}");
+        assert!(
+            !payload_str.contains("\"nonce\""),
+            "nonce key should be absent, got: {payload_str}"
+        );
+        assert!(
+            !payload_str.contains("\"at_hash\""),
+            "at_hash key should be absent, got: {payload_str}"
+        );
+        assert!(
+            !payload_str.contains("\"c_hash\""),
+            "c_hash key should be absent, got: {payload_str}"
+        );
         assert!(payload.get("nonce").is_none());
         assert!(payload.get("at_hash").is_none());
         assert!(payload.get("c_hash").is_none());
@@ -152,9 +161,18 @@ mod tests {
         let payload_str = String::from_utf8(payload_bytes).unwrap();
         let payload: serde_json::Value = serde_json::from_str(&payload_str).unwrap();
 
-        assert!(payload_str.contains("\"nonce\""), "nonce key should be present");
-        assert!(payload_str.contains("\"at_hash\""), "at_hash key should be present");
-        assert!(payload_str.contains("\"c_hash\""), "c_hash key should be present");
+        assert!(
+            payload_str.contains("\"nonce\""),
+            "nonce key should be present"
+        );
+        assert!(
+            payload_str.contains("\"at_hash\""),
+            "at_hash key should be present"
+        );
+        assert!(
+            payload_str.contains("\"c_hash\""),
+            "c_hash key should be present"
+        );
         assert_eq!(payload["nonce"], "test-nonce");
         assert_eq!(payload["at_hash"], "at_hash_value");
         assert_eq!(payload["c_hash"], "c_hash_value");
