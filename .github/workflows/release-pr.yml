@@ -40,13 +40,13 @@ jobs:
         env:
           OUTPUTS: ${{ toJson(steps.release.outputs) }}
 
-  docker:
-    name: Publish Docker
-    needs: release
-    if: ${{needs.release.outputs.release_created == 'true'}}
-    uses: ./.github/workflows/docker.yml
-    with:
-      version: ${{needs.release.outputs.version}}
-    secrets:
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  # docker:
+  #   name: Publish Docker
+  #   needs: release
+  #   if: ${{needs.release.outputs.release_created == 'true'}}
+  #   uses: ./.github/workflows/docker.yml
+  #   with:
+  #     version: ${{needs.release.outputs.version}}
+  #   secrets:
+  #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  #     DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
