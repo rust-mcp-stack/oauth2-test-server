@@ -254,7 +254,66 @@ Quick test with curl:
  }'
  ```
 
- ## How to Use in Tests
+## Configuration
+
+The server can be configured programmatically via [`IssuerConfig`](https://docs.rs/oauth2-test-server/latest/oauth2_test_server/config/struct.IssuerConfig.html), environment variables, or YAML/TOML config files.
+
+### Default User
+
+The server uses a hardcoded user identity for all authorization requests. By default this is `"test-user-123"`.
+
+```rust
+use oauth2_test_server::IssuerConfig;
+
+let config = IssuerConfig {
+    default_user_id: "alice".into(),
+    port: 0,
+    ..Default::default()
+};
+let server = OAuthTestServer::start_with_config(config).await;
+```
+
+Or via environment variable:
+
+```bash
+OAUTH_DEFAULT_USER_ID=alice oauth2-test-server
+```
+
+Or a config file (`config.yaml`):
+
+```yaml
+default_user_id: "alice"
+port: 8090
+```
+
+```bash
+oauth2-test-server --config config.yaml
+```
+
+### All Configuration Options
+
+| Field | Env Var | Default | Description |
+|-------|---------|---------|-------------|
+| `scheme` | `OAUTH_SCHEME` | `http` | URL scheme |
+| `host` | `OAUTH_HOST` | `localhost` | Bind host |
+| `port` | `OAUTH_PORT` | `8090` | Listen port (`0` = random) |
+| `default_user_id` | `OAUTH_DEFAULT_USER_ID` | `test-user-123` | Default `sub` claim when no user is logged in |
+| `require_state` | `OAUTH_REQUIRE_STATE` | `true` | Require `state` param in auth requests |
+| `generate_client_secret_for_dcr` | `OAUTH_GENERATE_CLIENT_SECRET_FOR_DCR` | `true` | Auto-generate client secret on DCR |
+| `access_token_expires_in` | `OAUTH_ACCESS_TOKEN_EXPIRES_IN` | `3600` | Access token TTL (seconds) |
+| `refresh_token_expires_in` | `OAUTH_REFRESH_TOKEN_EXPIRES_IN` | `2592000` | Refresh token TTL (seconds, 30 days) |
+| `authorization_code_expires_in` | `OAUTH_AUTHORIZATION_CODE_EXPIRES_IN` | `600` | Auth code TTL (seconds, 10 min) |
+| `cleanup_interval_secs` | `OAUTH_CLEANUP_INTERVAL_SECS` | `300` | Expired entry cleanup interval (`0` = disable) |
+| `allowed_origins` | `OAUTH_ALLOWED_ORIGINS` | `[]` | CORS origins (empty = allow all) |
+
+### Loading Order
+
+1. Programmatic `IssuerConfig` (highest priority)
+2. Environment variables (`OAUTH_*`)
+3. YAML/TOML config file
+4. Built-in defaults (lowest priority)
+
+  ## How to Use in Tests
 
 ### Quick Start
 ```rust

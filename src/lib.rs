@@ -103,6 +103,26 @@
 //! # • Revoke: http://127.0.0.1:8090/revoke
 //! ```
 //!
+//! ## Configuration
+//!
+//! The server is configured via [`IssuerConfig`]. Set `default_user_id` to
+//! change the user identity used in authorization flows:
+//!
+//! ```rust,no_run
+//! use oauth2_test_server::IssuerConfig;
+//!
+//! let config = IssuerConfig {
+//!     default_user_id: "alice".into(),
+//!     port: 0,
+//!     ..Default::default()
+//! };
+//! ```
+//!
+//! All fields can also be set via environment variables prefixed with
+//! `OAUTH_` (e.g. `OAUTH_DEFAULT_USER_ID=alice`), or via a YAML/TOML config
+//! file. See the [README](https://github.com/rust-mcp-stack/oauth2-test-server#configuration)
+//! for a full list of options.
+//!
 //! ## Example Usage
 //!
 //! ```bash
