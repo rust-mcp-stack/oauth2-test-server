@@ -99,4 +99,64 @@ mod tests {
         assert_eq!(claims.c_hash, None);
         assert_eq!(claims.typ, Some("IDToken".to_string()));
     }
+
+    #[test]
+    fn test_id_token_omits_nonce_key_when_not_provided() {
+        let keys = Keys::generate();
+
+        let id_token = issue_id_token(
+            "http://localhost:8090",
+            "test-client-id",
+            "test-user-id",
+            None,
+            None,
+            None,
+            3600,
+            serde_json::json!({}),
+            &keys,
+        )
+        .unwrap();
+
+        let parts: Vec<&str> = id_token.split('.').collect();
+        let payload_bytes = general_purpose::URL_SAFE_NO_PAD.decode(parts[1]).unwrap();
+        let payload_str = String::from_utf8(payload_bytes).unwrap();
+        let payload: serde_json::Value = serde_json::from_str(&payload_str).unwrap();
+
+        assert!(!payload_str.contains("\"nonce\""), "nonce key should be absent, got: {payload_str}");
+        assert!(!payload_str.contains("\"at_hash\""), "at_hash key should be absent, got: {payload_str}");
+        assert!(!payload_str.contains("\"c_hash\""), "c_hash key should be absent, got: {payload_str}");
+        assert!(payload.get("nonce").is_none());
+        assert!(payload.get("at_hash").is_none());
+        assert!(payload.get("c_hash").is_none());
+    }
+
+    #[test]
+    fn test_id_token_includes_nonce_key_when_provided() {
+        let keys = Keys::generate();
+
+        let id_token = issue_id_token(
+            "http://localhost:8090",
+            "test-client-id",
+            "test-user-id",
+            Some("test-nonce"),
+            Some("at_hash_value"),
+            Some("c_hash_value"),
+            3600,
+            serde_json::json!({}),
+            &keys,
+        )
+        .unwrap();
+
+        let parts: Vec<&str> = id_token.split('.').collect();
+        let payload_bytes = general_purpose::URL_SAFE_NO_PAD.decode(parts[1]).unwrap();
+        let payload_str = String::from_utf8(payload_bytes).unwrap();
+        let payload: serde_json::Value = serde_json::from_str(&payload_str).unwrap();
+
+        assert!(payload_str.contains("\"nonce\""), "nonce key should be present");
+        assert!(payload_str.contains("\"at_hash\""), "at_hash key should be present");
+        assert!(payload_str.contains("\"c_hash\""), "c_hash key should be present");
+        assert_eq!(payload["nonce"], "test-nonce");
+        assert_eq!(payload["at_hash"], "at_hash_value");
+        assert_eq!(payload["c_hash"], "c_hash_value");
+    }
 }
