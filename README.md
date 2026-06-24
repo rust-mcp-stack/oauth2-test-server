@@ -256,11 +256,13 @@ Quick test with curl:
 
 ## Configuration
 
-The server can be configured programmatically via [`IssuerConfig`](https://docs.rs/oauth2-test-server/latest/oauth2_test_server/config/struct.IssuerConfig.html), environment variables, or YAML/TOML config files.
+The server is configured via [`IssuerConfig`](https://docs.rs/oauth2-test-server/latest/oauth2_test_server/config/struct.IssuerConfig.html).
 
 ### Default User
 
 The server uses a hardcoded user identity for all authorization requests. By default this is `"test-user-123"`.
+
+Set it programmatically:
 
 ```rust
 use oauth2_test_server::IssuerConfig;
@@ -273,22 +275,19 @@ let config = IssuerConfig {
 let server = OAuthTestServer::start_with_config(config).await;
 ```
 
-Or via environment variable:
+Or, when using the library in your own tests, load from environment variables (`OAUTH_*`) or a YAML/TOML file:
 
-```bash
-OAUTH_DEFAULT_USER_ID=alice oauth2-test-server
+```rust
+// From environment variables (requires "config" feature)
+let config = IssuerConfig::from_env()?;
+
+// From a YAML or TOML file (requires "config" feature)
+let config = IssuerConfig::from_file("path/to/config.yaml")?;
 ```
 
-Or a config file (`config.yaml`):
+> **Note:** The standalone binary (`oauth2-test-server`) does not currently accept CLI flags or config files. Use the library API for custom configuration.
 
-```yaml
-default_user_id: "alice"
-port: 8090
-```
-
-```bash
-oauth2-test-server --config config.yaml
-```
+A complete sample config file with all options and their defaults can be found at [`config.sample.yaml`](./config.sample.yaml).
 
 ### All Configuration Options
 
@@ -310,8 +309,10 @@ oauth2-test-server --config config.yaml
 
 1. Programmatic `IssuerConfig` (highest priority)
 2. Environment variables (`OAUTH_*`)
-3. YAML/TOML config file
+3. YAML/TOML config file (detected by extension: `.yaml`, `.yml`, `.toml`)
 4. Built-in defaults (lowest priority)
+
+The `from_env` and `from_file` methods are available when the `config` feature is enabled (included by default).
 
   ## How to Use in Tests
 

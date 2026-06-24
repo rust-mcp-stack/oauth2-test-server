@@ -118,9 +118,10 @@
 //! };
 //! ```
 //!
-//! All fields can also be set via environment variables prefixed with
-//! `OAUTH_` (e.g. `OAUTH_DEFAULT_USER_ID=alice`), or via a YAML/TOML config
-//! file. See the [README](https://github.com/rust-mcp-stack/oauth2-test-server#configuration)
+//! All fields can also be loaded from environment variables prefixed with
+//! `OAUTH_` (e.g. `OAUTH_DEFAULT_USER_ID=alice`) via [`IssuerConfig::from_env`],
+//! or from a YAML/TOML file via [`IssuerConfig::from_file`].
+//! See the [README](https://github.com/rust-mcp-stack/oauth2-test-server#configuration)
 //! for a full list of options.
 //!
 //! ## Example Usage
