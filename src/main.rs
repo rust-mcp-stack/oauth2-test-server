@@ -92,6 +92,41 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn test_id_token_omits_nonce_when_not_sent() {
+        let server = oauth2_test_server::OAuthTestServer::start().await;
+
+        let client = server
+            .register_client(serde_json::json!({
+                "scope": "openid",
+                "redirect_uris": ["http://localhost:8080/callback"],
+            }))
+            .await;
+
+        let pkce = server.pkce_pair();
+
+        let token = server
+            .complete_auth_flow(
+                &client,
+                AuthorizeParams::new()
+                    .redirect_uri("http://localhost:8080/callback")
+                    .scope("openid")
+                    .pkce(pkce.clone()),
+                "test-user",
+            )
+            .await;
+
+        let id_token = token["id_token"].as_str().unwrap();
+        let parts: Vec<&str> = id_token.split('.').collect();
+        let payload_bytes = general_purpose::URL_SAFE_NO_PAD.decode(parts[1]).unwrap();
+        let payload_str = std::str::from_utf8(&payload_bytes).unwrap();
+
+        assert!(
+            !payload_str.contains("\"nonce\""),
+            "nonce key should be absent when no nonce was sent, got: {payload_str}"
+        );
+    }
+
+    #[tokio::test]
     async fn test_no_id_token_without_openid_scope() {
         let server = oauth2_test_server::OAuthTestServer::start().await;
 

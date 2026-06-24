@@ -254,7 +254,67 @@ Quick test with curl:
  }'
  ```
 
- ## How to Use in Tests
+## Configuration
+
+The server is configured via [`IssuerConfig`](https://docs.rs/oauth2-test-server/latest/oauth2_test_server/config/struct.IssuerConfig.html).
+
+### Default User
+
+The server uses a hardcoded user identity for all authorization requests. By default this is `"test-user-123"`.
+
+Set it programmatically:
+
+```rust
+use oauth2_test_server::IssuerConfig;
+
+let config = IssuerConfig {
+    default_user_id: "alice".into(),
+    port: 0,
+    ..Default::default()
+};
+let server = OAuthTestServer::start_with_config(config).await;
+```
+
+Or, when using the library in your own tests, load from environment variables (`OAUTH_*`) or a YAML/TOML file:
+
+```rust
+// From environment variables (requires "config" feature)
+let config = IssuerConfig::from_env()?;
+
+// From a YAML or TOML file (requires "config" feature)
+let config = IssuerConfig::from_file("path/to/config.yaml")?;
+```
+
+> **Note:** The standalone binary (`oauth2-test-server`) does not currently accept CLI flags or config files. Use the library API for custom configuration.
+
+A complete sample config file with all options and their defaults can be found at [`config.sample.yaml`](./config.sample.yaml).
+
+### All Configuration Options
+
+| Field | Env Var | Default | Description |
+|-------|---------|---------|-------------|
+| `scheme` | `OAUTH_SCHEME` | `http` | URL scheme |
+| `host` | `OAUTH_HOST` | `localhost` | Bind host |
+| `port` | `OAUTH_PORT` | `8090` | Listen port (`0` = random) |
+| `default_user_id` | `OAUTH_DEFAULT_USER_ID` | `test-user-123` | Default `sub` claim when no user is logged in |
+| `require_state` | `OAUTH_REQUIRE_STATE` | `true` | Require `state` param in auth requests |
+| `generate_client_secret_for_dcr` | `OAUTH_GENERATE_CLIENT_SECRET_FOR_DCR` | `true` | Auto-generate client secret on DCR |
+| `access_token_expires_in` | `OAUTH_ACCESS_TOKEN_EXPIRES_IN` | `3600` | Access token TTL (seconds) |
+| `refresh_token_expires_in` | `OAUTH_REFRESH_TOKEN_EXPIRES_IN` | `2592000` | Refresh token TTL (seconds, 30 days) |
+| `authorization_code_expires_in` | `OAUTH_AUTHORIZATION_CODE_EXPIRES_IN` | `600` | Auth code TTL (seconds, 10 min) |
+| `cleanup_interval_secs` | `OAUTH_CLEANUP_INTERVAL_SECS` | `300` | Expired entry cleanup interval (`0` = disable) |
+| `allowed_origins` | `OAUTH_ALLOWED_ORIGINS` | `[]` | CORS origins (empty = allow all) |
+
+### Loading Order
+
+1. Programmatic `IssuerConfig` (highest priority)
+2. Environment variables (`OAUTH_*`)
+3. YAML/TOML config file (detected by extension: `.yaml`, `.yml`, `.toml`)
+4. Built-in defaults (lowest priority)
+
+The `from_env` and `from_file` methods are available when the `config` feature is enabled (included by default).
+
+  ## How to Use in Tests
 
 ### Quick Start
 ```rust
