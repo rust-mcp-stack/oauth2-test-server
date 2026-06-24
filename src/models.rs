@@ -83,20 +83,28 @@ pub struct IdTokenClaims {
     /// Issued at time
     pub iat: usize,
     /// Authentication time
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub auth_time: Option<usize>,
     /// Nonce value from authorization request (must be echoed if present)
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub nonce: Option<String>,
     /// Access token hash (at_hash) - OIDC Core Section 3.2.2.9
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub at_hash: Option<String>,
     /// Authorization code hash (c_hash) - OIDC Core Section 3.2.2.9
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub c_hash: Option<String>,
     /// Authorized party (client_id)
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub azp: Option<String>,
     /// Token type
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub typ: Option<String>,
     /// Session ID
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub sid: Option<String>,
     /// JWT ID
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub jti: Option<String>,
     /// User claims (name, email, etc.)
     #[serde(flatten)]
