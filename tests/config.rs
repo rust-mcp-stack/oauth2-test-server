@@ -1,4 +1,5 @@
 use oauth2_test_server::IssuerConfig;
+use std::collections::BTreeSet;
 
 #[test]
 fn test_config_from_yaml() {
@@ -81,4 +82,37 @@ fn test_config_sample_file() {
     assert!(config.code_challenge_methods_supported.contains("S256"));
     assert_eq!(config.subject_types_supported, vec!["public"]);
     assert_eq!(config.id_token_signing_alg_values_supported, vec!["RS256"]);
+}
+
+#[test]
+fn test_config_sample_includes_all_supported_fields() {
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("config.sample.yaml");
+    let sample_contents = std::fs::read_to_string(path).unwrap();
+
+    let sample_yaml: serde_yaml::Value = serde_yaml::from_str(&sample_contents).unwrap();
+    let sample_keys: BTreeSet<String> = sample_yaml
+        .as_mapping()
+        .unwrap()
+        .keys()
+        .filter_map(|k| k.as_str().map(str::to_string))
+        .collect();
+
+    let default_yaml = serde_yaml::to_value(IssuerConfig::default()).unwrap();
+    let supported_keys: BTreeSet<String> = default_yaml
+        .as_mapping()
+        .unwrap()
+        .keys()
+        .filter_map(|k| k.as_str().map(str::to_string))
+        .collect();
+
+    let missing: Vec<String> = supported_keys
+        .difference(&sample_keys)
+        .cloned()
+        .collect();
+
+    assert!(
+        missing.is_empty(),
+        "config.sample.yaml is missing supported keys: {}",
+        missing.join(", ")
+    );
 }
