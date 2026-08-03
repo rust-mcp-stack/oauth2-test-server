@@ -227,6 +227,25 @@ You can run the server directly from your terminal - no code required.
 oauth2-test-server
 ```
 
+Or start with a YAML/TOML config file:
+
+```bash
+oauth2-test-server --config ./config.sample.yaml
+```
+
+Or via environment variables:
+
+```bash
+OAUTH_PORT=9000 OAUTH_DEFAULT_USER_ID=alice oauth2-test-server
+```
+
+Or generate starter config files in the current directory:
+
+```bash
+oauth2-test-server -generate-config-sample-yaml
+oauth2-test-server -generate-config-env-sample
+```
+
 You’ll see:
 ```
 OAuth Test Server running on http://127.0.0.1:8090/
@@ -275,7 +294,38 @@ let config = IssuerConfig {
 let server = OAuthTestServer::start_with_config(config).await;
 ```
 
-Or, when using the library in your own tests, load from environment variables (`OAUTH_*`) or a YAML/TOML file:
+Use either the standalone binary flag or the library API for custom configuration.
+
+Binary:
+
+```bash
+# Generate sample files in the current directory (fails if the file already exists)
+oauth2-test-server -generate-config-sample-yaml
+oauth2-test-server -generate-config-env-sample
+
+# Load from file
+oauth2-test-server --config ./config.sample.yaml
+
+# Env overrides
+OAUTH_PORT=9000 OAUTH_REQUIRE_STATE=false oauth2-test-server
+
+# Scalar CLI overrides (take highest precedence)
+oauth2-test-server --config ./config.sample.yaml --port 7777 --default-user-id alice
+```
+
+Supported scalar CLI overrides:
+- `--scheme`
+- `--host`
+- `--port`
+- `--default-user-id`
+- `--require-state`
+- `--generate-client-secret-for-dcr`
+- `--access-token-expires-in`
+- `--refresh-token-expires-in`
+- `--authorization-code-expires-in`
+- `--cleanup-interval-secs`
+
+Library:
 
 ```rust
 // From environment variables (requires "config" feature)
@@ -285,9 +335,8 @@ let config = IssuerConfig::from_env()?;
 let config = IssuerConfig::from_file("path/to/config.yaml")?;
 ```
 
-> **Note:** The standalone binary (`oauth2-test-server`) does not currently accept CLI flags or config files. Use the library API for custom configuration.
-
 A complete sample config file with all options and their defaults can be found at [`config.sample.yaml`](./config.sample.yaml).
+An environment-variable sample file can be generated as `./.config.sample.env` via `-generate-config-env-sample`.
 
 ### All Configuration Options
 
@@ -307,10 +356,13 @@ A complete sample config file with all options and their defaults can be found a
 
 ### Loading Order
 
-1. Programmatic `IssuerConfig` (highest priority)
-2. Environment variables (`OAUTH_*`)
+For the standalone binary:
+1. Scalar CLI overrides (highest priority)
+2. Environment variables (`OAUTH_*`) for scalar fields
 3. YAML/TOML config file (detected by extension: `.yaml`, `.yml`, `.toml`)
 4. Built-in defaults (lowest priority)
+
+For library usage, you control precedence explicitly based on whether you call `IssuerConfig::default`, `IssuerConfig::from_env`, `IssuerConfig::from_file`, or your own merge logic.
 
 The `from_env` and `from_file` methods are available when the `config` feature is enabled (included by default).
 

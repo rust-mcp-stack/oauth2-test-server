@@ -301,6 +301,298 @@ impl IssuerConfig {
     pub fn from_toml(toml_str: &str) -> Result<Self, ConfigError> {
         toml::from_str(toml_str).map_err(ConfigError::TomlParseError)
     }
+
+    /// Generate a commented YAML sample that includes every configurable option.
+    ///
+    /// The rendered fields are derived from `IssuerConfig` serialization so newly
+    /// added fields automatically appear in the generated output.
+    #[cfg(feature = "config")]
+    pub fn to_sample_yaml() -> Result<String, ConfigError> {
+        let sample = Self {
+            port: 8090,
+            ..Default::default()
+        };
+
+        let value = serde_yaml::to_value(&sample).map_err(ConfigError::YamlSerializeError)?;
+        let mut mapping = value
+            .as_mapping()
+            .cloned()
+            .ok_or(ConfigError::SampleGenerationError(
+                "issuer config did not serialize to a mapping".to_string(),
+            ))?;
+
+        let mut out = String::new();
+        out.push_str("# OAuth2 Test Server — Sample Configuration\n");
+        out.push_str("# Copy this file, edit the values, and load it via\n");
+        out.push_str("#   IssuerConfig::from_file(\"path/to/config.yaml\")\n");
+        out.push_str("#\n");
+        out.push_str("# All fields are optional — defaults are shown below.\n");
+
+        let ordered_sections = sample_sections();
+        let inline_comments = sample_inline_comments();
+
+        for (section_header, keys) in ordered_sections {
+            out.push_str("\n");
+            out.push_str(section_header);
+            out.push_str("\n");
+
+            for key in keys {
+                if let Some(field_value) = take_mapping_field(&mut mapping, key) {
+                    let comment = inline_comments.get(key).copied();
+                    append_yaml_field(&mut out, key, &field_value, comment)?;
+                }
+            }
+        }
+
+        let mut extras = mapping
+            .into_iter()
+            .filter_map(|(k, v)| match k {
+                serde_yaml::Value::String(name) => Some((name, v)),
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+        extras.sort_by(|(left, _), (right, _)| left.cmp(right));
+
+        if !extras.is_empty() {
+            out.push_str("\n# --- Additional Options ---\n");
+            for (name, field_value) in extras {
+                append_yaml_field(&mut out, &name, &field_value, None)?;
+            }
+        }
+
+        Ok(out)
+    }
+
+    /// Generate a commented .env sample that includes every configurable option.
+    ///
+    /// The rendered fields are derived from `IssuerConfig` serialization so newly
+    /// added fields automatically appear in the generated output.
+    #[cfg(feature = "config")]
+    pub fn to_sample_env() -> Result<String, ConfigError> {
+        let sample = Self {
+            port: 8090,
+            ..Default::default()
+        };
+
+        let value = serde_yaml::to_value(&sample).map_err(ConfigError::YamlSerializeError)?;
+        let mut mapping = value
+            .as_mapping()
+            .cloned()
+            .ok_or(ConfigError::SampleGenerationError(
+                "issuer config did not serialize to a mapping".to_string(),
+            ))?;
+
+        let mut out = String::new();
+        out.push_str("# OAuth2 Test Server — Sample Environment Configuration\n");
+        out.push_str("# Copy this file, edit values, and then export/source it before running oauth2-test-server\n");
+        out.push_str("#\n");
+        out.push_str("# All fields are optional — defaults are shown below.\n");
+
+        let ordered_sections = sample_sections();
+        let inline_comments = sample_inline_comments();
+
+        for (section_header, keys) in ordered_sections {
+            out.push_str("\n");
+            out.push_str(section_header);
+            out.push_str("\n");
+
+            for key in keys {
+                if let Some(field_value) = take_mapping_field(&mut mapping, key) {
+                    let env_key = config_key_to_env_var(key);
+                    let rendered = render_env_value(&field_value)?;
+
+                    out.push_str(&env_key);
+                    out.push('=');
+                    out.push_str(&rendered);
+                    if let Some(comment) = inline_comments.get(key).copied() {
+                        out.push_str(" # ");
+                        out.push_str(comment);
+                    }
+                    out.push('\n');
+                }
+            }
+        }
+
+        let mut extras = mapping
+            .into_iter()
+            .filter_map(|(k, v)| match k {
+                serde_yaml::Value::String(name) => Some((name, v)),
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+        extras.sort_by(|(left, _), (right, _)| left.cmp(right));
+
+        if !extras.is_empty() {
+            out.push_str("\n# --- Additional Options ---\n");
+            for (name, field_value) in extras {
+                let env_key = config_key_to_env_var(&name);
+                let rendered = render_env_value(&field_value)?;
+                out.push_str(&env_key);
+                out.push('=');
+                out.push_str(&rendered);
+                out.push('\n');
+            }
+        }
+
+        Ok(out)
+    }
+}
+
+#[cfg(feature = "config")]
+fn sample_sections() -> [(&'static str, &'static [&'static str]); 5] {
+    [
+        ("# --- Server ---", &["scheme", "host", "port"]),
+        ("# --- User Identity ---", &["default_user_id"]),
+        (
+            "# --- Security ---",
+            &[
+                "require_state",
+                "generate_client_secret_for_dcr",
+                "allowed_origins",
+            ],
+        ),
+        (
+            "# --- Token Lifetimes (seconds) ---",
+            &[
+                "access_token_expires_in",
+                "refresh_token_expires_in",
+                "authorization_code_expires_in",
+                "cleanup_interval_secs",
+            ],
+        ),
+        (
+            "# --- OIDC Capabilities ---",
+            &[
+                "scopes_supported",
+                "claims_supported",
+                "grant_types_supported",
+                "response_types_supported",
+                "token_endpoint_auth_methods_supported",
+                "code_challenge_methods_supported",
+                "subject_types_supported",
+                "id_token_signing_alg_values_supported",
+            ],
+        ),
+    ]
+}
+
+#[cfg(feature = "config")]
+fn sample_inline_comments() -> std::collections::HashMap<&'static str, &'static str> {
+    [
+        ("port", "0 = random free port"),
+        ("default_user_id", "sub claim in tokens/userinfo"),
+        (
+            "require_state",
+            "require state param in /authorize",
+        ),
+        (
+            "generate_client_secret_for_dcr",
+            "auto-generate secret on DCR",
+        ),
+        ("allowed_origins", "CORS (empty = allow all)"),
+        ("access_token_expires_in", "1 hour"),
+        ("refresh_token_expires_in", "30 days"),
+        ("authorization_code_expires_in", "10 minutes"),
+        (
+            "cleanup_interval_secs",
+            "cleanup expired every 5 min (0 = off)",
+        ),
+    ]
+    .into_iter()
+    .collect::<std::collections::HashMap<_, _>>()
+}
+
+#[cfg(feature = "config")]
+fn config_key_to_env_var(key: &str) -> String {
+    let mut out = String::with_capacity("OAUTH_".len() + key.len());
+    out.push_str("OAUTH_");
+
+    for ch in key.chars() {
+        if ch.is_ascii_alphanumeric() {
+            out.push(ch.to_ascii_uppercase());
+        } else {
+            out.push('_');
+        }
+    }
+
+    out
+}
+
+#[cfg(feature = "config")]
+fn render_env_value(value: &serde_yaml::Value) -> Result<String, ConfigError> {
+    match value {
+        serde_yaml::Value::Null => Ok(String::new()),
+        serde_yaml::Value::Bool(v) => Ok(v.to_string()),
+        serde_yaml::Value::Number(v) => Ok(v.to_string()),
+        serde_yaml::Value::String(v) => Ok(v.clone()),
+        serde_yaml::Value::Sequence(items) => {
+            let parts = items
+                .iter()
+                .map(render_env_scalar)
+                .collect::<Result<Vec<_>, _>>()?;
+            Ok(parts.join(","))
+        }
+        _ => serde_json::to_string(value).map_err(|err| {
+            ConfigError::SampleGenerationError(format!(
+                "failed to render env value as JSON: {err}"
+            ))
+        }),
+    }
+}
+
+#[cfg(feature = "config")]
+fn render_env_scalar(value: &serde_yaml::Value) -> Result<String, ConfigError> {
+    match value {
+        serde_yaml::Value::Bool(v) => Ok(v.to_string()),
+        serde_yaml::Value::Number(v) => Ok(v.to_string()),
+        serde_yaml::Value::String(v) => Ok(v.clone()),
+        serde_yaml::Value::Null => Ok(String::new()),
+        _ => Err(ConfigError::SampleGenerationError(
+            "unsupported nested value in sequence while rendering env sample".to_string(),
+        )),
+    }
+}
+
+#[cfg(feature = "config")]
+fn take_mapping_field(
+    mapping: &mut serde_yaml::Mapping,
+    key: &str,
+) -> Option<serde_yaml::Value> {
+    mapping.remove(serde_yaml::Value::String(key.to_string()))
+}
+
+#[cfg(feature = "config")]
+fn append_yaml_field(
+    out: &mut String,
+    key: &str,
+    value: &serde_yaml::Value,
+    inline_comment: Option<&str>,
+) -> Result<(), ConfigError> {
+    let rendered = serde_yaml::to_string(value)
+        .map_err(ConfigError::YamlSerializeError)?
+        .trim_end()
+        .to_string();
+
+    if rendered.contains('\n') {
+        out.push_str(key);
+        out.push_str(":\n");
+        for line in rendered.lines() {
+            out.push_str("  ");
+            out.push_str(line);
+            out.push('\n');
+        }
+    } else {
+        out.push_str(key);
+        out.push_str(": ");
+        out.push_str(&rendered);
+        if let Some(comment) = inline_comment {
+            out.push_str(" # ");
+            out.push_str(comment);
+        }
+        out.push('\n');
+    }
+
+    Ok(())
 }
 
 #[cfg(feature = "config")]
@@ -312,6 +604,90 @@ pub enum ConfigError {
     YamlParseError(serde_yaml::Error),
     #[error("TOML parse error: {0}")]
     TomlParseError(toml::de::Error),
+    #[error("YAML serialize error: {0}")]
+    YamlSerializeError(serde_yaml::Error),
     #[error("Unsupported config format: {0}")]
     UnsupportedFormat(String),
+    #[error("Sample generation error: {0}")]
+    SampleGenerationError(String),
+}
+
+#[cfg(test)]
+mod tests {
+    use super::IssuerConfig;
+    use std::collections::HashSet;
+
+    #[cfg(feature = "config")]
+    #[test]
+    fn sample_yaml_includes_all_configurable_keys() {
+        let sample_yaml = IssuerConfig::to_sample_yaml().unwrap();
+        let sample_value: serde_yaml::Value = serde_yaml::from_str(&sample_yaml).unwrap();
+        let sample_mapping = sample_value.as_mapping().unwrap();
+
+        let defaults = IssuerConfig {
+            port: 8090,
+            ..Default::default()
+        };
+        let default_value = serde_yaml::to_value(defaults).unwrap();
+        let default_mapping = default_value.as_mapping().unwrap();
+
+        let sample_keys = sample_mapping
+            .keys()
+            .filter_map(|value| value.as_str().map(|s| s.to_string()))
+            .collect::<HashSet<_>>();
+        let default_keys = default_mapping
+            .keys()
+            .filter_map(|value| value.as_str().map(|s| s.to_string()))
+            .collect::<HashSet<_>>();
+
+        assert_eq!(sample_keys, default_keys);
+    }
+
+    #[cfg(feature = "config")]
+    #[test]
+    fn sample_yaml_contains_expected_comment_headers() {
+        let sample_yaml = IssuerConfig::to_sample_yaml().unwrap();
+        assert!(sample_yaml.contains("# OAuth2 Test Server — Sample Configuration"));
+        assert!(sample_yaml.contains("# --- Server ---"));
+        assert!(sample_yaml.contains("# --- OIDC Capabilities ---"));
+    }
+
+    #[cfg(feature = "config")]
+    #[test]
+    fn sample_env_contains_expected_comment_headers() {
+        let sample_env = IssuerConfig::to_sample_env().unwrap();
+        assert!(sample_env.contains("# OAuth2 Test Server — Sample Environment Configuration"));
+        assert!(sample_env.contains("# --- Server ---"));
+        assert!(sample_env.contains("# --- OIDC Capabilities ---"));
+    }
+
+    #[cfg(feature = "config")]
+    #[test]
+    fn sample_env_includes_all_configurable_keys() {
+        let sample_env = IssuerConfig::to_sample_env().unwrap();
+        let sample_keys = sample_env
+            .lines()
+            .filter_map(|line| {
+                let line = line.trim();
+                if line.is_empty() || line.starts_with('#') {
+                    return None;
+                }
+                line.split_once('=').map(|(key, _)| key.to_string())
+            })
+            .collect::<HashSet<_>>();
+
+        let defaults = IssuerConfig {
+            port: 8090,
+            ..Default::default()
+        };
+        let default_value = serde_yaml::to_value(defaults).unwrap();
+        let default_mapping = default_value.as_mapping().unwrap();
+
+        let default_env_keys = default_mapping
+            .keys()
+            .filter_map(|value| value.as_str().map(super::config_key_to_env_var))
+            .collect::<HashSet<_>>();
+
+        assert_eq!(sample_keys, default_env_keys);
+    }
 }
